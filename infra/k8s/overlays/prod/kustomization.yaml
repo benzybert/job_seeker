@@ -1,0 +1,26 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../../base/mongo-statefulset.yaml
+  - ../../base/elasticsearch.yaml
+  - ../../base/kibana.yaml
+  - ../../base/minio.yaml
+  - ../../base/rabbitmq.yaml
+  - ../../base/ingestor-deployment.yaml
+  - ../../base/sender-deployment.yaml
+patches:
+  - target:
+      kind: Deployment
+      name: ingestor
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 2
+  - target:
+      kind: Deployment
+      name: sender
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 2
+

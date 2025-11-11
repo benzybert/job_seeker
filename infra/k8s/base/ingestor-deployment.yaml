@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ingestor
+spec:
+  ports:
+    - port: 8080
+      targetPort: 8080
+  selector:
+    app: ingestor
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ingestor
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ingestor
+  template:
+    metadata:
+      labels:
+        app: ingestor
+    spec:
+      containers:
+        - name: ingestor
+          image: your-dockerhub/job-agent-ingestor:latest
+          env:
+            - name: MONGO_URI
+              value: mongodb://mongo:27017
+            - name: ELASTIC_URL
+              value: http://elasticsearch:9200
+            - name: RABBIT_HOST
+              value: rabbitmq
+            - name: APPLY_QUEUE_ENABLED
+              value: "true"
+          command: ["python", "-m", "app.main"]
+

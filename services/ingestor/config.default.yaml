@@ -1,0 +1,33 @@
+sources:
+  lever:
+    enabled: true
+    orgs: ["monday", "similarweb"]
+  greenhouse:
+    enabled: true
+    boards: ["wix", "riskified", "fiverr", "taboola", "forter", "lemonade", "ironsource", "lightricks"]
+filters:
+  include_any: ["backend","python","full stack","data","devops"]
+  include_all: ["israel","tel aviv","herzliya","haifa","remote"]
+  exclude_any: ["senior manager","vp","c++ only"]
+email:
+  enabled: true
+  dry_run: true
+  from: "you@example.com"
+  to: "you@example.com"
+  subject_prefix: "[JobAgent]"
+  smtp_host: "smtp.gmail.com"
+  smtp_port: 587
+  smtp_user: "you@example.com"
+  smtp_pass: "app-password"
+  use_tls: true
+resumes:
+  backend: "s3://resumes/backend.pdf"
+  fullstack: "s3://resumes/fullstack.pdf"
+  data: "s3://resumes/data.pdf"
+runtime:
+  poll_seconds: 300
+  timezone: "Asia/Jerusalem"
+apply_queue:
+  enabled: false
+  queue_name: "jobs.new"
+

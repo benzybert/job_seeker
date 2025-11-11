@@ -1,0 +1,104 @@
+version: "3.8"
+
+services:
+  mongo:
+    image: mongo:7
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.runCommand({ ping: 1 })"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.0
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    ports:
+      - "9200:9200"
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fs http://localhost:9200/_cluster/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.13.0
+    depends_on:
+      - elasticsearch
+    ports:
+      - "5601:5601"
+
+  minio:
+    image: minio/minio:latest
+    environment:
+      MINIO_ROOT_USER: minio
+      MINIO_ROOT_PASSWORD: minio12345
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  ingestor:
+    build:
+      context: ../services/ingestor
+    environment:
+      MONGO_URI: mongodb://mongo:27017
+      ELASTIC_URL: http://elasticsearch:9200
+      RABBIT_HOST: rabbitmq
+      S3_ENDPOINT_URL: http://minio:9000
+      S3_ACCESS_KEY: minio
+      S3_SECRET_KEY: minio12345
+      EMAIL_DRY_RUN: "true"
+      APPLY_QUEUE_ENABLED: "false"
+    volumes:
+      - ../services/ingestor:/app
+      - ../packages/shared:/Users/ben/job_seeker/packages/shared
+    depends_on:
+      - mongo
+      - elasticsearch
+      - minio
+    command: python -m app.main
+
+  sender:
+    build:
+      context: ../services/sender
+    environment:
+      MONGO_URI: mongodb://mongo:27017
+      RABBIT_HOST: rabbitmq
+      S3_ENDPOINT_URL: http://minio:9000
+      S3_ACCESS_KEY: minio
+      S3_SECRET_KEY: minio12345
+      EMAIL_DRY_RUN: "true"
+      APPLY_QUEUE_ENABLED: "false"
+    volumes:
+      - ../services/sender:/app
+      - ../packages/shared:/Users/ben/job_seeker/packages/shared
+    depends_on:
+      - mongo
+      - minio
+    command: python -m app.main
+
+volumes:
+  mongo_data:
+  es_data:
+  minio_data:
+  ingestor_data:
+  sender_data:
+
+
