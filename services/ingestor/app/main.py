@@ -4,7 +4,7 @@ import os
 import time
 from loguru import logger
 from job_agent_shared import combine_text
-from .logging import setup_logging
+from job_agent_shared.logging import setup_logging
 from .config import get_settings
 from .sources.greenhouse import fetch_greenhouse_board
 from .sources.lever import fetch_lever_org

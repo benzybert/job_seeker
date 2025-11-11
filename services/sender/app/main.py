@@ -3,7 +3,7 @@ from __future__ import annotations
 import os
 import time
 from loguru import logger
-from .logging import setup_logging
+from job_agent_shared.logging import setup_logging
 from .config import get_settings
 from .storage.mongo_repo import get_collection, find_candidates, mark_status
 from .apply.chooser import choose_resume
