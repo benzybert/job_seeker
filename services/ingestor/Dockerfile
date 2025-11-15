@@ -4,12 +4,19 @@ WORKDIR /app
 
 RUN apt-get update && apt-get install -y --no-install-recommends build-essential && rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt /app/requirements.txt
+# Copy shared package first
+COPY packages/shared /app/packages/shared
+
+# Copy and install requirements
+COPY services/ingestor/requirements.txt /app/requirements.txt
 RUN pip install --no-cache-dir -r /app/requirements.txt
 
-COPY app /app/app
-COPY ../sender/templates /app/templates 2>/dev/null || true
-COPY config.default.yaml /app/config.default.yaml
+# Ensure the package is installed and accessible
+RUN pip install -e /app/packages/shared || true
+ENV PYTHONPATH=/app/packages/shared:${PYTHONPATH}
+
+COPY services/ingestor/app /app/app
+COPY services/ingestor/config.default.yaml /app/config.default.yaml
 
 ENV PYTHONUNBUFFERED=1
 CMD ["python", "-m", "app.main"]

@@ -5,5 +5,5 @@ pika>=1.3,<2
 loguru>=0.7,<1
 pydantic>=2.7,<3
 python-dateutil>=2.8,<3
--e /Users/ben/job_seeker/packages/shared
+-e /app/packages/shared
 
