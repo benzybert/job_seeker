@@ -1,24 +1,10 @@
 FROM python:3.11-slim
-
 WORKDIR /app
-
-RUN apt-get update && apt-get install -y --no-install-recommends build-essential && rm -rf /var/lib/apt/lists/*
-
-# Copy shared package first
 COPY packages/shared /app/packages/shared
-
-# Copy and install requirements
-COPY services/ingestor/requirements.txt /app/requirements.txt
-RUN pip install --no-cache-dir -r /app/requirements.txt
-
-# Ensure the package is installed and accessible
-RUN pip install -e /app/packages/shared || true
-ENV PYTHONPATH=/app/packages/shared:${PYTHONPATH}
-
-COPY services/ingestor/app /app/app
-COPY services/ingestor/config.default.yaml /app/config.default.yaml
-
-ENV PYTHONUNBUFFERED=1
-CMD ["python", "-m", "app.main"]
+COPY services/ingestor/requirements.txt .
+RUN pip install -r requirements.txt
+RUN pip install -e /app/packages/shared
+COPY services/ingestor /app/services/ingestor
+CMD ["python", "-m", "services.ingestor.app.main"]
 
 
